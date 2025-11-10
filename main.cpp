@@ -12,16 +12,16 @@ using std::list;
 
 const unsigned int num_input = FREQ*SZ;
     const unsigned int num_output = FREQ;
-    const unsigned int num_layers = 2;
+    const unsigned int num_layers = 3;
 
-    const unsigned int num_neurons_hidden = 128;
-    const float desired_error = (const float) 0.0000001;
+    const unsigned int num_neurons_hidden = 32;
+    const double desired_error = (const double) 0.00000000001;
     const unsigned int max_epochs = 1;
     const unsigned int epochs_between_reports = 1;
 
     struct fann *ann = fann_create_standard(num_layers, num_input,
-        num_neurons_hidden, 1024*512);
-    struct fann *ann2 = fann_create_standard(num_layers, 1024*512,
+        num_neurons_hidden, 1024*900);
+    struct fann *ann2 = fann_create_standard(num_layers, 1024*900,
         num_neurons_hidden, num_output);
     
  
@@ -34,13 +34,15 @@ const unsigned int num_input = FREQ*SZ;
 
 int iterations = 0;
 int limit = 128;
-void processBuffer(short* buffer,int len) {https://libfann.github.io/fann/docs/files/fann-h.html
+void processBuffer(short* buffer_previous, short* buffer,int len) {https://libfann.github.io/fann/docs/files/fann-h.html
     fann_type buf[len];
+    fann_type buf_p[len];
     for (int i = 0; i < len; i++) {
         buf[i] = buffer[i];
+        buf_p[i] = buffer_previous[i];
     }
         std::cout << "Started training " << iterations << std::endl <<std::flush;
-        fann_train(ann, buf, buf);
+        fann_train(ann, buf_p, buf);
         fann_type *calc_out = fann_run(ann, buf);
         fann_train(ann2, calc_out, buf);
         std::cout << "Ended training" << std::endl << std::flush;
@@ -86,6 +88,7 @@ int main(int argC,char* argV[])
     errorCode = alGetError();
 
     short buffer[FREQ*SZ]; // A buffer to hold captured audio
+    short buffer_prev[FREQ*SZ];
     ALCint samplesIn=0;  // How many samples are captured
     ALint availBuffers=0; // Buffers to be recovered
     ALuint myBuff; // The buffer we're using
@@ -133,7 +136,9 @@ int main(int argC,char* argV[])
 
                         for (int i = 0; i < FREQ*SZ; i++) {
                             buf[i] = buffer[i];
+                            buffer_prev[i] = buffer[i];
                         }
+                  alBufferData(myBuff,AL_FORMAT_MONO16,buf,CAP_SIZE*sizeof(short),FREQ);
             //  if (iterations >= limit-1)
                   alSourcePlay(calc_out[0]);
 
@@ -144,7 +149,7 @@ int main(int argC,char* argV[])
 
                
 
-                     processBuffer(buffer, FREQ*SZ);
+                     processBuffer(buffer_prev, buffer, FREQ*SZ);
                     
                      iterations++;  
                 
