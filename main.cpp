@@ -137,7 +137,6 @@ int main(int argC,char* argV[])
 
                         for (int i = 0; i < FREQ*SZ; i++) {
                             buf[i] = buffer[i];
-                            buffer_prev[i] = buffer[i];
                         }
                   alBufferData(myBuff,AL_FORMAT_MONO16,buf,CAP_SIZE*sizeof(short),FREQ);
             //  if (iterations >= limit-1)
@@ -152,6 +151,10 @@ int main(int argC,char* argV[])
 
                      processBuffer(buffer_prev, buffer, FREQ*SZ);
                     
+                    for (int i = 0; i < FREQ*SZ; i++) {
+                            
+                            buffer_prev[i] = buffer[i];
+                        }
                      iterations++;  
                 
         
