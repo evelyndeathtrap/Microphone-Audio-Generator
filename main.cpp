@@ -42,8 +42,9 @@ void processBuffer(short* buffer_previous, short* buffer,int len) {https://libfa
         buf_p[i] = buffer_previous[i];
     }
         std::cout << "Started training " << iterations << std::endl <<std::flush;
+        fann_type* calc_out = fann_run(ann, buf);
         fann_train(ann, buf_p, buf);
-        fann_type *calc_out = fann_run(ann, buf);
+        calc_out = fann_run(ann, buf);
         fann_train(ann2, calc_out, buf);
         std::cout << "Ended training" << std::endl << std::flush;
 
